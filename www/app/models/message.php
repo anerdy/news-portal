@@ -5,7 +5,7 @@ use App\Core\Model;
 
 class Message extends Model
 {
-    protected $table = 'social_db.messages';
+    protected $table = 'messages';
 
     const SHARD_COUNT = 3;
 

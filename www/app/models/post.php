@@ -5,7 +5,7 @@ use App\Core\Model;
 
 class Post extends Model
 {
-    protected $table = 'social_db.posts';
+    protected $table = 'posts';
 
     public function addPost($authorId, $message)
     {

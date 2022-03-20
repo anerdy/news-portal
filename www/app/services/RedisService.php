@@ -19,33 +19,83 @@ class RedisService
             'host' => redis,
             "password" => "testpass"
         ]);
-
     }
 
-    public function setPosts($posts, $userId)
+    public function setNews($news, $topicId)
     {
         try {
-            $this->client->set('feed'.$userId, serialize($posts));
+            $this->client->set('news_topic_'.$topicId, serialize($news));
+            $this->client->expire('news_topic_'.$topicId, 60);
         } catch (Exception $e) {
             die('Ошибка Redis: '.$e->getMessage());
         }
     }
 
-    public function getPosts($userId): array
+    public function getNews($topicId): array
     {
         try {
-            $posts = $this->client->get('feed'.$userId);
+            $news = $this->client->get('news_topic_'.$topicId);
         } catch (Exception $e) {
             die('Ошибка Redis: '.$e->getMessage());
         }
-        if (is_null($posts)) {
-            $posts = [];
+        if (is_null($news)) {
+            $news = [];
         } else {
-            $posts = unserialize($posts);
+            $news = unserialize($news);
         }
 
-        return $posts;
+        return $news;
     }
 
+    public function setTopics($topics)
+    {
+        try {
+            $this->client->set('topics', serialize($topics));
+            $this->client->expire('news_topic_'.$topicId, 10000);
+        } catch (Exception $e) {
+            die('Ошибка Redis: '.$e->getMessage());
+        }
+    }
+
+    public function getTopics(): array
+    {
+        try {
+            $topics = $this->client->get('topics');
+        } catch (Exception $e) {
+            die('Ошибка Redis: '.$e->getMessage());
+        }
+        if (is_null($topics)) {
+            $topics = [];
+        } else {
+            $topics = unserialize($topics);
+        }
+
+        return $topics;
+    }
+
+    public function setWsFlag($flag)
+    {
+        try {
+            $this->client->set('ws_flag', $flag);
+        } catch (Exception $e) {
+            die('Ошибка Redis: '.$e->getMessage());
+        }
+    }
+    
+    public function getWsFlag(): int
+    {
+        try {
+            $flag = $this->client->get('ws_flag');
+        } catch (Exception $e) {
+            die('Ошибка Redis: '.$e->getMessage());
+        }
+        if (is_null($flag)) {
+            $flag = 0;
+        } else {
+           // $flag = 1;
+        }
+
+        return $flag;
+    }
 
 }

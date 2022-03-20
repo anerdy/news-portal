@@ -4,29 +4,34 @@ namespace App\Services;
 use App\Core\Controller;
 use App\Models\Post;
 use App\Models\User;
+use App\Models\Subscription;
 use App\Core\View;
 use \Exception;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Channel\AMQPChannel;
+use App\Services\RedisService;
 
 
 class RabbitMQService
 {
+    public $subscriptions;
+    
     function __construct()
     {
     }
 
-    public function addPosts(array $friendsIds, string $message)
+    
+    public function addNews(int $topicId, string $title, string $text)
     {
         $connection = new AMQPStreamConnection(
-            rabbitmq,	#host - имя хоста, на котором запущен сервер RabbitMQ
+            rabbitmq,	    #host - имя хоста, на котором запущен сервер RabbitMQ
             5672,       	#port - номер порта сервиса, по умолчанию - 5672
             'guest',    	#user - имя пользователя для соединения с сервером
             'guest'     	#password
         );
         $channel = $connection->channel();
-        $exchange = 'test_exchange';
+        $exchange = 'news_exchange'; //.$topicId;
 
         # Create the exchange if it doesnt exist already.
         $channel->exchange_declare(
@@ -37,10 +42,13 @@ class RabbitMQService
             false     # auto_delete
         );
 
-        foreach($friendsIds as $friendId) {
-            /** @var $channel AMQPChannel */
-            $queueName = 'feed'.$friendId;
+      //  $subscriptions = new Subscription();
+    //    $subscriptions = $subscriptions->getSubscriptionsByTopic($topicId);
 
+     //   foreach($subscriptions as $subscription) {
+         //   $queueName = 'subscription'.$subscription['user_id'];
+            $queueName = 'subscription'.$topicId;
+            /** @var $channel AMQPChannel */
             $channel->queue_declare(
                 $queueName,	#queue name - Имя очереди может содержать до 255 байт UTF-8 символов
                 false,      	#passive - может использоваться для проверки того, инициирован ли обмен, без того, чтобы изменять состояние сервера
@@ -50,70 +58,24 @@ class RabbitMQService
             );
             $channel->queue_bind($queueName, $exchange);
 
-            $msg = new AMQPMessage($message, array('delivery_mode' => 2));
+            $message = serialize(['title' => $title, 'text' => $text]);
+            $msg = new AMQPMessage($message, ['delivery_mode' => 2]);
             $channel->basic_publish(
                 $msg,       	#message
                 '',         	#exchange
                 $queueName 	#routing key
             );
-        }
+     //   }
 
         $channel->close();
         $connection->close();
 
     }
 
-    public function getPosts($userId): array
+    public function consumeNews($topicId, $userId, $WSconnection, $redisService)
     {
-        $connection = new AMQPStreamConnection(
-            rabbitmq,	#host
-            5672,       	#port
-            'guest',    	#user
-            'guest'     	#password
-        );
-
-        $channel = $connection->channel();
-        $queueName = 'feed'.$userId;
-
-        /*
-        $channel->exchange_declare(
-            'test_exchange', 
-            'fanout', # type
-            false,    # passive
-            false,    # durable
-            false     # auto_delete
-        );
-        */
-        
-        $messages = [];
-        
-        try {
-            $message = $channel->basic_get($queueName);
-            while ($message !== null) {
-                $message->ack();
-                $messages[] = $message->body;
-                sleep(1);
-                $message = $channel->basic_get($queueName);
-            }
-        } catch (Exception $e) {
-            if ($e->getCode() != 404) {
-                die('Ошибка Redis: '.$e->getMessage());
-            } else {
-                // queue not found
-            }
-        }
-        
-        $channel->close();
-        $connection->close();
-
-        return $messages;
-    }
-
-
-    public function consumePosts($userId, $WSconnection): array
-    {
-        $exchange = 'test_exchange';
-        $queue_name = 'feed'.$userId;
+        $exchange = 'news_exchange'; //.$topicId;
+        $queue_name = 'subscription'.$topicId;
         $connection = new AMQPStreamConnection(
             '127.0.0.1',	#host
             5672,       	#port
@@ -146,8 +108,9 @@ class RabbitMQService
             print 'Waiting for logs. To exit press CTRL+C' . PHP_EOL;
 
             $callback = function($msg) use ($WSconnection) {
-                $WSconnection->send($msg->body);
-                print "Read: " . $msg->body . PHP_EOL;
+                $msgData = unserialize($msg->body);
+                $WSconnection->send(json_encode($msgData));
+                print "Read: " . json_encode($msgData) . PHP_EOL;
                 $msg->ack();
             };
 
@@ -161,16 +124,18 @@ class RabbitMQService
                 $callback
             );
 
-            while (count($channel->callbacks))
+            while ($channel->is_open())
             {
-                $channel->wait();
+                $channel->wait(null, false, 30);
             }
 
         } catch (Exception $e) {
+            $channel->close();
+            $connection->close();
             if ($e->getCode() != 404) {
                 die('Ошибка Redis: '.$e->getMessage());
             } else {
-                // queue not found
+                die('queue not found: '.$e->getMessage());
             }
         }
 
@@ -178,5 +143,6 @@ class RabbitMQService
         $connection->close();
 
     }
+
 
 }

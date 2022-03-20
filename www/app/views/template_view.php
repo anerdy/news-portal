@@ -16,7 +16,10 @@
         <ul class="navbar-nav mr-auto ">
             <?php if ( isset($_COOKIE['auth']) ): ?>
                 <li class="nav-item">
-                    <a class="nav-link" href="/news/list">Новости</a>
+                    <a class="nav-link" href="/news/index">Новости</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/news/add">Добавить новость</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/user/profile">Ваша страница</a>
@@ -50,5 +53,13 @@
     </div>
 <?php endif; ?>
 <?php include 'app/views/'.$content_view; ?>
+
+<footer>
+    <div align="center">
+        <p><span>Server&nbsp;address:</span> <span>server_address</span></p>
+        <p><span>Server&nbsp;name:</span> <span>server_hostname</span></p>
+        <p><span>Date:</span> <span>server_date</span></p>
+    </div>
+</footer>
 </body>
 </html>
