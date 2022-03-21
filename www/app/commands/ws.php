@@ -10,7 +10,6 @@ require_once 'www/app/services/RabbitMQService.php';
 require_once 'www/app/services/RedisService.php';
 
 use Workerman\Worker;
-use Workerman\Lib\Timer;
 use App\Services\RabbitMQService;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use App\Services\RedisService;

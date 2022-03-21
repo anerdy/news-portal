@@ -2,7 +2,6 @@
 namespace App\Services;
 
 use App\Core\Controller;
-use App\Models\Post;
 use App\Models\User;
 use App\Models\Subscription;
 use App\Core\View;
@@ -21,55 +20,58 @@ class RabbitMQService
     {
     }
 
-    
     public function addNews(int $topicId, string $title, string $text)
     {
-        $connection = new AMQPStreamConnection(
-            rabbitmq,	    #host - имя хоста, на котором запущен сервер RabbitMQ
-            5672,       	#port - номер порта сервиса, по умолчанию - 5672
-            'guest',    	#user - имя пользователя для соединения с сервером
-            'guest'     	#password
-        );
-        $channel = $connection->channel();
-        $exchange = 'news_exchange'; //.$topicId;
-
-        # Create the exchange if it doesnt exist already.
-        $channel->exchange_declare(
-            $exchange, 
-            'fanout', # type
-            false,    # passive
-            false,    # durable
-            false     # auto_delete
-        );
-
-      //  $subscriptions = new Subscription();
-    //    $subscriptions = $subscriptions->getSubscriptionsByTopic($topicId);
-
-     //   foreach($subscriptions as $subscription) {
-         //   $queueName = 'subscription'.$subscription['user_id'];
-            $queueName = 'subscription'.$topicId;
-            /** @var $channel AMQPChannel */
-            $channel->queue_declare(
-                $queueName,	#queue name - Имя очереди может содержать до 255 байт UTF-8 символов
-                false,      	#passive - может использоваться для проверки того, инициирован ли обмен, без того, чтобы изменять состояние сервера
-                false,      	#durable - убедимся, что RabbitMQ никогда не потеряет очередь при падении - очередь переживёт перезагрузку брокера
-                false,      	#exclusive - используется только одним соединением, и очередь будет удалена при закрытии соединения
-                false       	#autodelete - очередь удаляется, когда отписывается последний подписчик
+        try {
+            $connection = new AMQPStreamConnection(
+                rabbitmq,	    #host - имя хоста, на котором запущен сервер RabbitMQ
+                5672,       	#port - номер порта сервиса, по умолчанию - 5672
+                'guest',    	#user - имя пользователя для соединения с сервером
+                'guest'     	#password
             );
-            $channel->queue_bind($queueName, $exchange);
-
-            $message = serialize(['title' => $title, 'text' => $text]);
-            $msg = new AMQPMessage($message, ['delivery_mode' => 2]);
-            $channel->basic_publish(
-                $msg,       	#message
-                '',         	#exchange
-                $queueName 	#routing key
+            $channel = $connection->channel();
+            $exchange = 'news_exchange'; //.$topicId;
+    
+            # Create the exchange if it doesnt exist already.
+            $channel->exchange_declare(
+                $exchange, 
+                'fanout', # type
+                false,    # passive
+                false,    # durable
+                false     # auto_delete
             );
-     //   }
+    
+          //  $subscriptions = new Subscription();
+        //    $subscriptions = $subscriptions->getSubscriptionsByTopic($topicId);
+    
+         //   foreach($subscriptions as $subscription) {
+             //   $queueName = 'subscription'.$subscription['user_id'];
+                $queueName = 'subscription'.$topicId;
+                /** @var $channel AMQPChannel */
+                $channel->queue_declare(
+                    $queueName,	#queue name - Имя очереди может содержать до 255 байт UTF-8 символов
+                    false,      	#passive - может использоваться для проверки того, инициирован ли обмен, без того, чтобы изменять состояние сервера
+                    false,      	#durable - убедимся, что RabbitMQ никогда не потеряет очередь при падении - очередь переживёт перезагрузку брокера
+                    false,      	#exclusive - используется только одним соединением, и очередь будет удалена при закрытии соединения
+                    false       	#autodelete - очередь удаляется, когда отписывается последний подписчик
+                );
+                $channel->queue_bind($queueName, $exchange);
+    
+                $message = serialize(['title' => $title, 'text' => $text]);
+                $msg = new AMQPMessage($message, ['delivery_mode' => 2]);
+                $channel->basic_publish(
+                    $msg,       	#message
+                    '',         	#exchange
+                    $queueName 	#routing key
+                );
+         //   }
+    
+            $channel->close();
+            $connection->close();
 
-        $channel->close();
-        $connection->close();
-
+        }  catch (Exception $e) {
+            var_dump($e->getMessage());
+        }
     }
 
     public function consumeNews($topicId, $userId, $WSconnection, $redisService)

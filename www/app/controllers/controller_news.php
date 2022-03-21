@@ -27,7 +27,6 @@ class Controller_News extends Controller
 
     public function action_index()
     {
-       // $this->redisService->setWsFlag(0);
         $currentUser = [];
         if (!isset($_COOKIE['auth'])) {
             header("Location: /?message=Вы не авторизованы!");
@@ -36,16 +35,6 @@ class Controller_News extends Controller
             $currentUser = $this->user->getCurrentUser();
         }
 
-        /*
-        $posts = $this->rabbitMQService->getPosts($userId);
-        if (!empty($posts)) {
-            $redisPosts = $this->redisService->getPosts($userId);
-            $posts = array_merge($posts, $redisPosts);
-            $this->redisService->setPosts($posts, $userId);
-        } else {
-            $posts = $this->redisService->getPosts($userId);
-        }*/
-        
         $topics = $this->redisService->getTopics();
         if (empty($topics)) {
             $topics = $this->topic->getTopics();
@@ -58,11 +47,12 @@ class Controller_News extends Controller
             $topicId = 1;
         }
         
-     //   $news = $this->redisService->getNews($topicId);
-       // if (empty($news)) {
+        $news = $this->redisService->getNews($topicId);
+        if (empty($news)) {
             $news = $this->news->getNewsByTopicId($topicId);
-         //   $this->redisService->setNews($news, $topicId);
-       // }
+            $this->redisService->setNews($news, $topicId);
+        }
+        krsort($news);
 
         $this->view->generate('news/feed.php', 'template_view.php', ['currentUser' => $currentUser, 'currentTopicId' => $topicId, 'topics' => $topics, 'news' => $news] );
     }

@@ -113,7 +113,8 @@ INSERT INTO `users` (`id`, `login`, `password`, `name`, `age`, `interests`) VALU
 -- Индексы таблицы `news`
 --
 ALTER TABLE `news`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `topic_index` (`topic_id`);
 
 --
 -- Индексы таблицы `topics`

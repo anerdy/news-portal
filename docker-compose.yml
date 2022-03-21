@@ -61,7 +61,7 @@ services:
         build: ./images/mysql2
         container_name: mysql2
         ports:
-            - "3307:3306"
+            - "3307:3307"
         volumes:
          - ./logs/mysql2:/var/log/mysql
          - ./db/mysql2:/var/lib/mysql

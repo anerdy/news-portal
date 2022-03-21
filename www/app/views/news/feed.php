@@ -3,8 +3,6 @@
 
         <div class="col-md-12">
             <h1>Новости</h1>
-            <a href="/news/add">Добавить новость</a>
-          <!--   <button onclick="myFunction()" >What is the time?</button> -->
         </div>
         <div class="col-md-12">
             <ul class="nav nav-tabs">
@@ -62,11 +60,5 @@
     };
     setTimeout(func, 2 * 1000);
 
-/*
-function myFunction() {
-//    ws.send(['<?= $data['currentUser']['id']; ?>', '<?= $data['currentTopicId']; ?>']); //send on server
-       
-    ws.close();
-}*/
 
 </script>

@@ -2,7 +2,6 @@
 namespace App\Services;
 
 use App\Core\Controller;
-use App\Models\Post;
 use App\Models\User;
 use App\Core\View;
 use \Exception;
