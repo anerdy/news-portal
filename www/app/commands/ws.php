@@ -2,7 +2,6 @@
 // start from project root
 // php www/app/commands/ws.php start
 ini_set('display_errors', 1);
-//require_once 'docker-compose.yaml';
 require_once 'www/config.php';
 require_once 'www/vendor/autoload.php';
 require_once 'www/app/core/database.php';

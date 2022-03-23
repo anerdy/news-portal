@@ -58,47 +58,4 @@ class Model
         return $correctFields;
     }
 
-    /**
-    public function get($fields = [])
-    {
-        $fieldsArray = $this->validateFields(array_keys($fields));
-        $selectFields = implode(', ', $fieldsArray);
-
-        $where = '';
-        foreach ($fields as $key => $value) {
-            if ($key !== array_key_first($fields)) {
-                $where .= ' AND ';
-            }
-            $where .= '`'.$key.'` = :'.$key;
-        }
-
-        $result = $this->connection->prepare('SELECT '.$selectFields.' FROM ' . $this->table . ' WHERE ' . $where . ' ');
-
-        foreach ($fields as $key => $value) {
-            $result->bindParam(':'.$key, $value);
-        }
-        $result->execute();
-
-        return $result;
-    }
-
-    public function check($fields = [])
-    {
-        //var_dump($fields);
-        $rows = $this->get($fields);
-        //var_dump($rows);
-        while ($row = $rows->fetch())
-        {
-            echo $row['login'] . "\n";
-        }
-        $fieldsArray = $this->validateFields($fields);
-        $fields = implode(',', $fieldsArray);
-
-        $sql = "SELECT ".$fields." FROM " . $this->table;
-        $result = $this->connection->query($sql);
-
-        return $result;
-    }
-     **/
-
 }
