@@ -19,7 +19,7 @@ services:
         container_name: nginx-backend-1
         restart: "no"
         ports:
-            - "80:80"
+            - "81:81"
         volumes:
             - ./hosts:/etc/nginx/conf.d
             - ./www:/var/www/main
