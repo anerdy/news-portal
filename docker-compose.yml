@@ -92,11 +92,11 @@ services:
         image: haproxy:2.2
         container_name: haproxylb
         restart: "no"
-        volumes:
-            - "./libs/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg"
         ports:
             - "3309:3309"
             - "8404:8404"
+        volumes:
+            - "./libs/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg"
         links:
             - mysql1
             - mysql2
