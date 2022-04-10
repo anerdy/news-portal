@@ -9,7 +9,9 @@ FROM mysql:latest
 RUN apt-get update && apt-get dist-upgrade -y && apt-get install -y wget gnupg2 curl lsb-release nano systemd procps coreutils iproute2 git cmake unzip bzip2 libblkid-dev e2fslibs-dev libboost-all-dev libaudit-dev cpp g++ libncurses5-dev && \
 	cd /etc/mysql/ && \
 	mkdir custom.conf.d && \
-	echo "!includedir /etc/mysql/custom.conf.d/" >> my.cnf
+	echo "!includedir /etc/mysql/custom.conf.d/" >> my.cnf \
+	mkdir /var/log/mysql \
+	chown mysql:mysql /var/log/mysql
 
 ADD my.cnf /etc/mysql/custom.conf.d/my.cnf
 
