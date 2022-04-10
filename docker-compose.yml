@@ -57,6 +57,12 @@ services:
         environment:
             MYSQL_ROOT_PASSWORD: test
             MYSQL_DATABASE: news_db
+            TZ: Europe/Moscow
+        command:
+            - mysqld
+            - "--character-set-server=utf8mb4"
+            - "--skip-character-set-client-handshake"
+            - "--collation-server=utf8mb4_unicode_ci"
     mysql2:
         build: ./images/mysql2
         container_name: mysql2
@@ -70,6 +76,12 @@ services:
         environment:
             MYSQL_ROOT_PASSWORD: test
             MYSQL_DATABASE: news_db
+            TZ: Europe/Moscow
+        command:
+            - mysqld
+            - "--character-set-server=utf8mb4"
+            - "--skip-character-set-client-handshake"
+            - "--collation-server=utf8mb4_unicode_ci"
     rabbitmq:
         image: rabbitmq:3.9-management-alpine
         container_name: 'rabbitmq'
