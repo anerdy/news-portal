@@ -47,6 +47,7 @@ services:
     mysql1:
         build: ./images/mysql1
         container_name: mysql1
+        user: "1000:50"
         ports:
             - "3306:3306"
         volumes:
@@ -66,6 +67,7 @@ services:
     mysql2:
         build: ./images/mysql2
         container_name: mysql2
+        user: "1000:50"
         ports:
             - "3307:3307"
         volumes:
@@ -85,6 +87,7 @@ services:
     rabbitmq:
         image: rabbitmq:3.9-management-alpine
         container_name: 'rabbitmq'
+        user: "1000:50"
         ports:
             - 5672:5672
             - 15672:15672
